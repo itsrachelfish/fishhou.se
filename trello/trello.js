@@ -4,6 +4,7 @@ var shame =
 {
     checklist: {},
     ledger: {},
+    source: {},
     total: {}
 };
 
@@ -35,25 +36,48 @@ fs.readFile('data/' + config.board + '.json', 'utf8', function(error, data)
             // Only pay attention to cards in the list of outstanding rent
             if(card.idList == shame.list)
             {
-                console.log(card.name);
-                console.log("=============");
-
                 // Loop through all of the checklists in this card
                 card.idChecklists.forEach(function(idChecklist)
                 {
+                    var checklist = shame.checklist[idChecklist];
+                    
                     // Loop through all of the rows in the checklist
-                    shame.checklist[idChecklist].checkItems.forEach(function(item)
+                    checklist.checkItems.forEach(function(item)
                     {
                         if(item.state == "incomplete")
                         {
-                            console.log(item.name);
+                            // Match the person's name and the amount they owe
+                            var row = item.name.match(/(.*?) - \$([0-9.]+)/);
+                            var name = row[1];
+                            var amount = parseFloat(row[2]);
+
+                            if(shame.ledger[name] === undefined)
+                                shame.ledger[name] = [];
+
+                            if(shame.total[name] === undefined)
+                                shame.total[name] = 0;
+
+                            if(shame.source[name] === undefined)
+                                shame.source[name] = {};
+
+                            if(shame.source[name][checklist.name] === undefined)
+                                shame.source[name][checklist.name] = 0;
+
+                            // Save the card name, checklist name, and amount
+                            // For example: June 2015 - Utilities - $45
+                            shame.ledger[name].push(card.name + ' - ' + checklist.name + ' - $' + amount);
+                            shame.source[name][checklist.name] += amount;
+                            shame.total[name] += amount;
                         }
                     });
                 });
-
-                console.log("------------");
             }
         });
+
+        // Now output the totals
+        console.log(shame.ledger);
+        console.log(shame.source);
+        console.log(shame.total);
     }
     else
     {
