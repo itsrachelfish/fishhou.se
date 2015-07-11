@@ -1,8 +1,9 @@
 var fs = require('fs');
 var config = require('./config');
+
+var checklists = {};
 var shame =
 {
-    checklist: {},
     ledger: {},
     source: {},
     total: {}
@@ -27,7 +28,7 @@ fs.readFile('data/' + config.board + '.json', 'utf8', function(error, data)
         // Loop through checklists to find out what they contain
         board.checklists.forEach(function(checklist)
         {
-            shame.checklist[checklist.id] = checklist;
+            checklists[checklist.id] = checklist;
         });
         
         // Now loop through the cards
@@ -39,7 +40,7 @@ fs.readFile('data/' + config.board + '.json', 'utf8', function(error, data)
                 // Loop through all of the checklists in this card
                 card.idChecklists.forEach(function(idChecklist)
                 {
-                    var checklist = shame.checklist[idChecklist];
+                    var checklist = checklists[idChecklist];
                     
                     // Loop through all of the rows in the checklist
                     checklist.checkItems.forEach(function(item)
@@ -75,9 +76,22 @@ fs.readFile('data/' + config.board + '.json', 'utf8', function(error, data)
         });
 
         // Now output the totals
-        console.log(shame.ledger);
-        console.log(shame.source);
-        console.log(shame.total);
+        console.log("Shame ledger:\n", shame.ledger);
+        console.log("Shame by source:\n", shame.source);
+        console.log("Total shame:\n", shame.total);
+
+        // Save statistics to a file
+        fs.writeFile('data/shame.json', JSON.stringify(shame), function(error)
+        {
+            if(error)
+            {
+                console.log("There was an error saving the statistics!");
+            }
+            else
+            {
+                console.log("Statistics saved.");
+            }
+        });
     }
     else
     {
