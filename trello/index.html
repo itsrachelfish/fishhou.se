@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <title>Fish House Shame Board!</title>
+        <script src="jquery.min.js"></script>
+
+        <script>
+            $(document).ready(function()
+            {
+                $.getJSON('data/shame.json', function(shame)
+                {
+                    for(var name in shame.total)
+                    {
+                        $('.total').append("<li><b>"+name+"</b> - $"+shame.total[name]+"</li>");
+                    }
+
+                    for(var name in shame.source)
+                    {
+                        var list = $("<ul></ul>");
+
+                        for(var type in shame.source[name])
+                        {
+                            list.append("<li><b>"+type+"</b> - $"+shame.source[name][type]+"</li>");
+                        }
+
+                        var row = $("<li><b>"+name+"</b></li>");
+                        row.append(list);
+                        
+                        $('.type').append(row);
+                    }
+
+                    for(var name in shame.ledger)
+                    {
+                        var list = $("<ul></ul>");
+
+                        shame.ledger[name].forEach(function(entry)
+                        {
+                            list.append("<li>"+entry+"</li>");
+                        });
+
+                        var row = $("<li><b>"+name+"</b></li>");
+                        row.append(list);
+                        
+                        $('.ledger').append(row);
+                    }
+                });
+            });
+        </script>
+    </head>
+
+    <body>
+        <h1>Paying rent is hard</h1>
+
+        <h3>Total owed</h3>
+        <ul class="total"></ul>
+
+        <h3>Total owed by type</h3>
+        <ul class="type"></ul>
+
+        <h3>Ledger</h3>
+        <ul class="ledger"></ul>
+    </body>
+</html>
